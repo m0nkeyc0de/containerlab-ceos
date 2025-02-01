@@ -1,0 +1,30 @@
+name: test
+
+topology:
+  kinds:
+    ceos:
+      image: ceos64lab:4.33.1F
+      startup-config: base-startup-config.tpl
+      binds:
+        - et_mapping.json:/mnt/flash/EosIntfMapping.json:ro
+      env:
+        INTFTYPE: et
+        CLAB_MGMT_VRF: MGMT
+  nodes:
+    leaf1:
+      kind: ceos
+    leaf2:
+      kind: ceos
+    host1:
+      kind: ceos
+  links:
+    - endpoints: ["leaf1:et1", "leaf2:et1"]
+    # host1 to leaf1 and leaf2
+    - endpoints: ["host1:et1", "leaf1:et5"]
+    - endpoints: ["host1:et2", "leaf2:et5"]
+    # Dummy links
+    - type: dummy
+      endpoint:
+        node: host1
+        interface: et8
+
