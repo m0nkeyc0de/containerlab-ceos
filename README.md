@@ -19,11 +19,16 @@ Python scripts
 
 * ``
 
-Bootstrap python
+Handy *nmcli* commands
+```
+nmcli con show
+nmcli con add type bridge ifname ceos-operdown
+```
+
+Bootstrap python venv
 
 ```
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-

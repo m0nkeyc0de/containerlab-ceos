@@ -17,14 +17,14 @@ topology:
       kind: ceos
     host1:
       kind: ceos
+    ceos-operdown:
+      # nmcli con add type bridge ifname ceos-operdown
+      kind: bridge
   links:
     - endpoints: ["leaf1:et1", "leaf2:et1"]
     # host1 to leaf1 and leaf2
     - endpoints: ["host1:et1", "leaf1:et5"]
     - endpoints: ["host1:et2", "leaf2:et5"]
-    # Dummy links
-    - type: dummy
-      endpoint:
-        node: host1
-        interface: et8
-
+    # Links to ceos-operdown bridge
+    - endpoints: ["leaf1:et2", "ceos-operdown:leaf1-e2"]
+    - endpoints: ["leaf2:et2", "ceos-operdown:leaf2-e2"]
