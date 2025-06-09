@@ -1,0 +1,78 @@
+name: l3ls
+
+topology:
+  kinds:
+    arista_ceos:
+      image: ceos64lab:4.33.1F
+      startup-config: base-startup-config.tpl
+      binds:
+        - et_mapping.json:/mnt/flash/EosIntfMapping.json:ro
+      env:
+        INTFTYPE: et
+        CLAB_MGMT_VRF: MGMT
+
+
+  nodes:
+    a-spine-1:
+      kind: arista_ceos
+    a-spine-2:
+      kind: arista_ceos
+    b-spine-1:
+      kind: arista_ceos
+    b-spine-2:
+      kind: arista_ceos
+    a-leaf-1:
+      kind: arista_ceos
+    a-leaf-2:
+      kind: arista_ceos
+    a-host-1:
+      kind: arista_ceos
+    b-leaf-1:
+      kind: arista_ceos
+    b-leaf-2:
+      kind: arista_ceos
+    b-host-1:
+      kind: arista_ceos
+    c-leaf-1:
+      kind: arista_ceos
+    c-leaf-2:
+      kind: arista_ceos
+    c-host-1:
+      kind: arista_ceos
+    d-leaf-1:
+      kind: arista_ceos
+    d-host-1:
+      kind: arista_ceos
+
+  links:
+    # Spines
+    - endpoints: ["a-spine-1:et1", "a-spine-2:et1"]
+    - endpoints: ["b-spine-1:et1", "b-spine-2:et1"]
+    - endpoints: ["a-spine-1:et2", "b-spine-1:et2"]
+    - endpoints: ["a-spine-2:et2", "b-spine-2:et2"]
+    # Leafs A
+    - endpoints: ["a-leaf-1:et1", "a-spine-1:et3"]
+    - endpoints: ["a-leaf-1:et2", "a-spine-2:et3"]
+    - endpoints: ["a-leaf-2:et1", "a-spine-1:et4"]
+    - endpoints: ["a-leaf-2:et2", "a-spine-2:et4"]
+    - endpoints: ["a-leaf-1:et3", "a-leaf-2:et3"]
+    # Leafs B
+    - endpoints: ["b-leaf-1:et1", "b-spine-1:et3"]
+    - endpoints: ["b-leaf-1:et2", "b-spine-2:et3"]
+    - endpoints: ["b-leaf-2:et1", "b-spine-1:et4"]
+    - endpoints: ["b-leaf-2:et2", "b-spine-2:et4"]
+    - endpoints: ["b-leaf-1:et3", "b-leaf-2:et3"]
+    # Leafs C
+    - endpoints: ["c-leaf-1:et1", "a-spine-2:et5"]
+    - endpoints: ["c-leaf-2:et1", "b-spine-2:et5"]
+    - endpoints: ["c-leaf-1:et3", "c-leaf-2:et3"]
+    # Leaf D
+    - endpoints: ["d-leaf-1:et1", "b-spine-1:et5"]
+    # Hosts
+    - endpoints: ["a-host-1:et1", "a-leaf-1:et4"]
+    - endpoints: ["a-host-1:et2", "a-leaf-2:et4"]
+    - endpoints: ["b-host-1:et1", "b-leaf-1:et4"]
+    - endpoints: ["b-host-1:et2", "b-leaf-2:et4"]
+    - endpoints: ["c-host-1:et1", "c-leaf-1:et4"]
+    - endpoints: ["c-host-1:et2", "c-leaf-2:et4"]
+    - endpoints: ["d-host-1:et1", "d-leaf-1:et4"]

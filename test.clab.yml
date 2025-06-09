@@ -2,7 +2,7 @@ name: test
 
 topology:
   kinds:
-    ceos:
+    arista_ceos:
       image: ceos64lab:4.33.1F
       startup-config: base-startup-config.tpl
       binds:
@@ -12,11 +12,11 @@ topology:
         CLAB_MGMT_VRF: MGMT
   nodes:
     leaf1:
-      kind: ceos
+      kind: arista_ceos
     leaf2:
-      kind: ceos
+      kind: arista_ceos
     host1:
-      kind: ceos
+      kind: arista_ceos
     ceos-operdown:
       # nmcli con add type bridge ifname ceos-operdown
       kind: bridge
