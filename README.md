@@ -1,24 +1,12 @@
 # cEOS with containerlab
 Playing around with *cEOS* and *containerlab*.
 
-Network topologies
+## Network topologies
 
-* `test.clab.yml` : random tests
+* [test.clab.ym](test.clab.yml) : testing topology
+* [l3ls.clab.ym](l3ls.clab.yml) : L3 Leaf-Spine
 
-Configuration files
-
-* `et_mapping.json` : container to EOS interface mappping file which uses the *et* scheme
-* `base-startup-config.tpl` : custom base configuration adapted from the original file from the containerlab project
-
-Bash scripts
-
-* `containerlab.sh` : helper script to start containerlab
-* `arista_cli_tmux.sh` : open all clab container shells in a tmux session
-
-Python scripts
-
-* ``
-
+## Handy commands
 Handy *nmcli* commands
 ```
 nmcli con show
@@ -30,5 +18,5 @@ Bootstrap python venv
 ```
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r python/requirements.txt
 ```

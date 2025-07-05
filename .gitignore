@@ -1,3 +1,9 @@
+# Containerlab topology runtime data
 clab-*
-*.bak
+
+# Python
 .venv/
+
+# Misc files
+*.bak
+

@@ -4,9 +4,9 @@ topology:
   kinds:
     arista_ceos:
       image: ceos64lab:4.33.1F
-      startup-config: base-startup-config.tpl
+      startup-config: arista/base-startup-config.tpl
       binds:
-        - et_mapping.json:/mnt/flash/EosIntfMapping.json:ro
+        - arista/et_mapping.json:/mnt/flash/EosIntfMapping.json:ro
       env:
         INTFTYPE: et
         CLAB_MGMT_VRF: MGMT
