@@ -3,7 +3,8 @@ clab-*
 
 # Python
 .venv/
+*.pyc
 
 # Misc files
 *.bak
-
+.vscode/*
