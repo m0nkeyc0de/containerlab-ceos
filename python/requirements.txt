@@ -9,7 +9,7 @@ idna==3.10
 Pygments==2.19.1
 pyxdg==0.28
 PyYAML==6.0.2
-requests==2.32.3
+requests==2.32.4
 scapy==2.6.1
 six==1.17.0
 urllib3==2.5.0
