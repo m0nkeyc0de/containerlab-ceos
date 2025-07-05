@@ -7,6 +7,11 @@ Playing around with *cEOS* and *containerlab*.
 * [l3ls.clab.ym](l3ls.clab.yml) : L3 Leaf-Spine
 
 ## Handy commands
+Import docker image
+```
+sudo docker import cEOS64-lab-4.34.1F.tar.xz ceos64lab:4.34.1F
+```
+
 Handy *nmcli* commands
 ```
 nmcli con show
