@@ -1,0 +1,32 @@
+name: l3lsmini
+
+topology:
+  kinds:
+    arista_ceos:
+      image: ceos64lab:4.34.1F
+      startup-config: arista/base-startup-config.tpl
+      binds:
+        - arista/et_mapping.json:/mnt/flash/EosIntfMapping.json:ro
+      env:
+        INTFTYPE: et
+        CLAB_MGMT_VRF: MGMT
+  nodes:
+    spine1:
+      kind: arista_ceos
+    leaf1:
+      kind: arista_ceos
+    leaf2:
+      kind: arista_ceos
+    host1:
+      kind: arista_ceos
+    host2:
+      kind: arista_ceos
+
+  links:
+    - endpoints: ["spine1:et1", "leaf1:et1"]
+    - endpoints: ["spine1:et2", "leaf2:et1"]
+    - endpoints: ["leaf1:et2", "leaf2:et2"]
+    - endpoints: ["host1:et1", "leaf1:et3"]
+    - endpoints: ["host1:et2", "leaf2:et3"]
+    - endpoints: ["host2:et1", "leaf1:et4"]
+    - endpoints: ["host2:et2", "leaf2:et4"]

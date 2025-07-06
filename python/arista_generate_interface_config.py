@@ -20,12 +20,11 @@ from libs.constants import (
     RE_HOST,
 )
 
-def host_interfaces_data(links):
+def host_interfaces_data(host_data, links):
     """
     Genereate interfaces data that can be used in interface.j2 
     from lab links, for each host found
     """
-    host_data = {} # Key is host
 
     for link in links:
         endpoints = link['endpoints']
@@ -96,7 +95,8 @@ if __name__ == "__main__":
     root_net = ipaddress.IPv4Network(PTP_ROOT_SUBNET)
     ptp_subnets = root_net.subnets(new_prefix=PTP_MASK)
 
-    host_data = host_interfaces_data(lab_data['topology']['links'])
+    host_data = {} # Key is host
+    host_data = host_interfaces_data(host_data, lab_data['topology']['links'])
 
     # Generate the output file
     output_data = f"# Lab {lab_name} - Interfaces configuration\n"
