@@ -1,2 +1,2 @@
 # Python
-Python scripts around containerlab.
+Messy Python project to help with the lab

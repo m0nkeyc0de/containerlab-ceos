@@ -3,7 +3,7 @@ name: l3ls
 topology:
   kinds:
     arista_ceos:
-      image: ceos64lab:4.33.1F
+      image: ceos64lab:4.34.1F
       startup-config: arista/base-startup-config.tpl
       binds:
         - arista/et_mapping.json:/mnt/flash/EosIntfMapping.json:ro

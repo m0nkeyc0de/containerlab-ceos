@@ -1,13 +1,15 @@
-# L3 PTP interfaces configuration
+# Lab test - Interfaces configuration
 
 ## leaf1
 
 ```
 interface et1
+ no switchport
  ip address 10.1.0.0/31
 
 interface et5
- ip address 10.1.0.3/31
+ no ip address
+ switchport
 
 ```
 
@@ -15,10 +17,12 @@ interface et5
 
 ```
 interface et1
+ no switchport
  ip address 10.1.0.1/31
 
 interface et5
- ip address 10.1.0.5/31
+ no ip address
+ switchport
 
 ```
 
@@ -26,9 +30,11 @@ interface et5
 
 ```
 interface et1
- ip address 10.1.0.2/31
+ no ip address
+ switchport
 
 interface et2
- ip address 10.1.0.4/31
+ no ip address
+ switchport
 
 ```

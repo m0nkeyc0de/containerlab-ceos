@@ -1,9 +1,12 @@
 // Copyright 2020 Nokia
 // Licensed under the BSD 3-Clause License.
 // SPDX-License-Identifier: BSD-3-Clause
+// Original file: https://github.com/srl-labs/containerlab/blob/main/nodes/ceos/ceos.cfg
 
 hostname {{ .ShortName }}
 username admin privilege 15 secret admin
+!
+aaa authorization exec default local
 !
 service routing protocols model multi-agent
 !
