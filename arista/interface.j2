@@ -1,0 +1,4 @@
+interface {{ name }}
+  {% if description %}description {{ description }}{% else %}no description{% endif %}
+  {% if address %}no switchport{% else %}switchport{% endif %}
+  {% if address %}ip address {{ address }}{% else %}no ip address{% endif %}

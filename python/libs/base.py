@@ -1,5 +1,6 @@
 import os
 import sys
+from jinja2 import Environment, FileSystemLoader
 from .constants import OUTPUT_DIR, BACKUP_DIR, SCRIPT_DIR
 
 def validate_run_env():
@@ -17,3 +18,11 @@ def validate_run_env():
     if not os.path.exists(BACKUP_DIR):
         os.mkdir(BACKUP_DIR)
         print(f"I: Lab devices backup directory '{BACKUP_DIR}' created.")
+
+def jinja2_render(template_file, data):
+    """
+    Render Jinja2 template file with provided data
+    """
+    environment = Environment(loader=FileSystemLoader("arista/"))
+    template = environment.get_template(template_file)
+    return template.render(data)

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # Generate interfaces configuration
-# TODO: MLAG ? PortChannel ? We'll see later
 
 import ipaddress
 import os
 import re
 import copy
 
-from libs.base import validate_run_env
+from libs.base import (
+    validate_run_env,
+    jinja2_render,
+)
 from libs.containerlab import lab_load_data
 from libs.constants import (
     OUTPUT_DIR,
@@ -18,104 +20,95 @@ from libs.constants import (
     RE_HOST,
 )
 
-validate_run_env()
+def host_interfaces_data(links):
+    """
+    Genereate interfaces data that can be used in interface.j2 
+    from lab links, for each host found
+    """
+    host_data = {} # Key is host
 
-lab_data = lab_load_data()
-lab_name = lab_data['name']
+    for link in links:
+        endpoints = link['endpoints']
 
-output_file = os.path.join(OUTPUT_DIR, f"{lab_name}_interfaces.md")
+        # Point-to-point links obviously only have two endpoints
+        if len(endpoints) != 2:
+            print(f"W: Only links with two enpoints (PTP) are supported. This one isn't: {endpoints}")
+            continue
 
-root_net = ipaddress.IPv4Network(PTP_ROOT_SUBNET)
-ptp_subnets = root_net.subnets(new_prefix=PTP_MASK)
+        host_found = False
+        leaf_found = False
+        spine_found = False
 
-host_data = {} # Key is host
+        for endpoint in endpoints:
+            host = endpoint.split(":")[0]
+            
+            if re.match(RE_HOST, host):
+                host_found = True
 
-# Get through all links
-for link in lab_data['topology']['links']:
-    endpoints = link['endpoints']
+            if re.match(RE_LEAF, host):
+                leaf_found = True
 
-    # Point-to-point links obviously only have two endpoints
-    if len(endpoints) != 2:
-        print(f"W: Only links with two enpoints (PTP) are supported. This one isn't: {endpoints}")
-        continue
+            if re.match(RE_SPINE, host):
+                spine_found = True
 
-    host_found = False
-    leaf_found = False
-    spine_found = False
+        # L3 Leaf-Spine topology links kinds
+        # - leaf-spine : L3
+        # - leaf-host : L2
+        # - leaf-leaf : L2 (MLAG)
+        # - spine-spine : L3 (backbone)
+        link_is_l3 = (leaf_found and spine_found) or (spine_found and not host_found)
 
-    for endpoint in endpoints:
-        host = endpoint.split(":")[0]
-        
-        if re.match(RE_HOST, host):
-            host_found = True
+        ptp_subnet = next(ptp_subnets) if link_is_l3 else None
+        ptp_hosts = ptp_subnet.hosts() if ptp_subnet else None
 
-        if re.match(RE_LEAF, host):
-            leaf_found = True
+        for endpoint in endpoints:
+            intf_data = {}
+            host, intf = endpoint.split(":")
 
-        if re.match(RE_SPINE, host):
-            spine_found = True
+            intf_data['name'] = intf
 
-    # L3 Leaf-Spine topology links kinds
-    # - leaf-spine : L3
-    # - leaf-host : L2
-    # - leaf-leaf : L2 (MLAG)
-    # - spine-spine : L3 (backbone)
-    link_is_l3 = (leaf_found and spine_found) or (spine_found and not host_found)
+            if link_is_l3:
+                addr = next(ptp_hosts)
+                intf_data['address'] = str(addr) + f"/{PTP_MASK}"
 
-    ptp_subnet = next(ptp_subnets) if link_is_l3 else None
-    ptp_hosts = ptp_subnet.hosts() if ptp_subnet else None
+            if host not in host_data:
+                host_data[host] = {
+                    'interfaces' : {}, # Key is interface
+                }
 
-    for endpoint in endpoints:
-        intf_data = {}
-        host, intf = endpoint.split(":")
+            # Get other endpoint for description
+            tmp_endpoints = copy.copy(endpoints)
+            tmp_endpoints.remove(endpoint)
+            intf_data['description'] = tmp_endpoints[0]
+            
+            host_data[host]['interfaces'][intf] = intf_data
 
-        if link_is_l3:
-            addr = next(ptp_hosts)
-            intf_data['address'] = str(addr) + f"/{PTP_MASK}"
+    return host_data
 
-        if host not in host_data:
-            host_data[host] = {
-                'interfaces' : {}, # Key is interface
-            }
+if __name__ == "__main__":
+    validate_run_env()
 
-        # Get other endpoint for description
-        tmp_endpoints = copy.copy(endpoints)
-        tmp_endpoints.remove(endpoint)
-        intf_data['description'] = tmp_endpoints[0]
-        
-        host_data[host]['interfaces'][intf] = intf_data
+    lab_data = lab_load_data()
+    lab_name = lab_data['name']
 
-# Generate the output file
-# TODO jinja2 ?
-output_lines = []
-output_lines.append(f"# Lab {lab_name} - Interfaces configuration\n")
+    output_file = os.path.join(OUTPUT_DIR, f"{lab_name}_interfaces.md")
 
-for host, data in host_data.items():
-    output_lines.append(f"## {host}\n")
-    output_lines.append("```")
+    root_net = ipaddress.IPv4Network(PTP_ROOT_SUBNET)
+    ptp_subnets = root_net.subnets(new_prefix=PTP_MASK)
 
-    for intf, intf_data in data['interfaces'].items():
-        intf_ip_address = intf_data.get('address')
-        intf_description = intf_data.get('description')
+    host_data = host_interfaces_data(lab_data['topology']['links'])
 
-        output_lines.append(f"interface {intf}")
+    # Generate the output file
+    output_data = f"# Lab {lab_name} - Interfaces configuration\n"
 
-        if intf_description:
-            output_lines.append(f" description {intf_description}")
-        else:
-            output_lines.append(" no description")
+    for host, data in host_data.items():
+        output_data += f"## {host}\n```\n"
 
-        if intf_ip_address:
-            output_lines.append(" no switchport")
-            output_lines.append(f" ip address {intf_ip_address}")
+        for intf, intf_data in data['interfaces'].items():
+            output_data += jinja2_render("interface.j2", intf_data)
+            output_data += "\n"
 
-        else:
-            output_lines.append(" no ip address")
-            output_lines.append(" switchport")
+        output_data += "\n```\n"
 
-        output_lines.append("")
-
-    output_lines.append("```\n")
-
-with open(output_file, 'w') as f:
-    f.write("\n".join(output_lines))
+    with open(output_file, 'w') as f:
+        f.write(output_data)
