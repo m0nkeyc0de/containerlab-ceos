@@ -4,10 +4,12 @@
 
 ```
 interface et1
- no switchport
- ip address 10.1.0.0/31
+ description leaf2:et1
+ no ip address
+ switchport
 
 interface et5
+ description host1:et1
  no ip address
  switchport
 
@@ -17,10 +19,12 @@ interface et5
 
 ```
 interface et1
- no switchport
- ip address 10.1.0.1/31
+ description leaf1:et1
+ no ip address
+ switchport
 
 interface et5
+ description host1:et2
  no ip address
  switchport
 
@@ -30,10 +34,12 @@ interface et5
 
 ```
 interface et1
+ description leaf1:et5
  no ip address
  switchport
 
 interface et2
+ description leaf2:et5
  no ip address
  switchport
 

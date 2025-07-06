@@ -5,6 +5,7 @@
 import ipaddress
 import os
 import re
+import copy
 
 from libs.base import validate_run_env
 from libs.containerlab import lab_load_data
@@ -38,8 +39,6 @@ for link in lab_data['topology']['links']:
         print(f"W: Only links with two enpoints (PTP) are supported. This one isn't: {endpoints}")
         continue
 
-    # L3 point-to-point links only apply between spines and leafs in a L3 Leaf-Spine topology
-    # Other links are L2
     host_found = False
     leaf_found = False
     spine_found = False
@@ -56,7 +55,12 @@ for link in lab_data['topology']['links']:
         if re.match(RE_SPINE, host):
             spine_found = True
 
-    link_is_l3 = (leaf_found or spine_found) and not host_found
+    # L3 Leaf-Spine topology links kinds
+    # - leaf-spine : L3
+    # - leaf-host : L2
+    # - leaf-leaf : L2 (MLAG)
+    # - spine-spine : L3 (backbone)
+    link_is_l3 = (leaf_found and spine_found) or (spine_found and not host_found)
 
     ptp_subnet = next(ptp_subnets) if link_is_l3 else None
     ptp_hosts = ptp_subnet.hosts() if ptp_subnet else None
@@ -73,10 +77,16 @@ for link in lab_data['topology']['links']:
             host_data[host] = {
                 'interfaces' : {}, # Key is interface
             }
+
+        # Get other endpoint for description
+        tmp_endpoints = copy.copy(endpoints)
+        tmp_endpoints.remove(endpoint)
+        intf_data['description'] = tmp_endpoints[0]
         
         host_data[host]['interfaces'][intf] = intf_data
 
 # Generate the output file
+# TODO jinja2 ?
 output_lines = []
 output_lines.append(f"# Lab {lab_name} - Interfaces configuration\n")
 
@@ -86,11 +96,17 @@ for host, data in host_data.items():
 
     for intf, intf_data in data['interfaces'].items():
         intf_ip_address = intf_data.get('address')
+        intf_description = intf_data.get('description')
 
         output_lines.append(f"interface {intf}")
 
+        if intf_description:
+            output_lines.append(f" description {intf_description}")
+        else:
+            output_lines.append(" no description")
+
         if intf_ip_address:
-            output_lines.append(f" no switchport")
+            output_lines.append(" no switchport")
             output_lines.append(f" ip address {intf_ip_address}")
 
         else:
